@@ -10,6 +10,7 @@ def trade_spider(max):
         else :
             url = 'http://www.yify-torrent.org/popular-' + str(page) + '.html'
             print(url)
+        print('\nList of url in popular page ' + str(page) + '\n')
         source_code = requests.get(url)
         plain_text = source_code.text
         soup = BeautifulSoup(plain_text,"html.parser")
@@ -20,4 +21,4 @@ def trade_spider(max):
                 print('http://www.yify-torrent.org' + href)
         page += 1
 
-trade_spider(1)
+trade_spider(5)
