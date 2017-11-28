@@ -15,7 +15,9 @@ def trade_spider(max):
         soup = BeautifulSoup(plain_text,"html.parser")
         for link in soup.findAll('a',{'target' : '_blank'}):
             href = link.get('href')
-            print('http://www.yify-torrent.org' + href)
+            listhref = list(href)
+            if(listhref[0] == '/'):
+                print('http://www.yify-torrent.org' + href)
         page += 1
 
 trade_spider(1)
