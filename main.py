@@ -1,35 +1,47 @@
-import requests
-from bs4 import BeautifulSoup
+import shutil
+import threading
+from queue import Queue
+from spider import Spider
+from domain import *
+from general import *
 
-def trade_spider(max):
-    page = 1
-    while page <= max :
-        if(page == 1) :
-            url = 'http://www.yify-torrent.org/popular.html'
-        else :
-            url = 'http://www.yify-torrent.org/popular-' + str(page) + '.html'
-        print('\nList of url in  ' + url + ' :\n')
+PROJECT_NAME = 'soccerbase'
+HOMEPAGE = 'http://www.soccerbase.com/'
+DOMAIN_NAME = get_domain_name(HOMEPAGE)
+QUEUE_FILE = PROJECT_NAME + '/queue.txt'
+CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
+NUMBER_OF_THREADS = 1
 
-        source_code = requests.get(url)
-        plain_text = source_code.text
-        soup = BeautifulSoup(plain_text,"html.parser")
+queue = Queue()
+Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
-        listlink = []
-        purelink = [] # List that contain no duplicate
+# Create worker threads
+def create_spiders():
+    for _ in range(NUMBER_OF_THREADS):
+        t = threading.Thread(target = work)
+        t.daemon = True
+        t.start()
 
-        for link in soup.findAll('a',{'target' : '_blank'}):
-            href = link.get('href')
-            # listhref to ommit a non downloaded format
-            listhref = list(href)
-            if(listhref[0] == '/') and (listhref[1] == 'm'):
-                listlink.append('http://www.yify-torrent.org' + str(href))
+# Work that threads do
+def work():
+    while True:
+        url = queue.get()
+        Spider.crawl_page(threading.current_thread().name, url)
+        queue.task_done()
 
-        for link in listlink:
-            if link not in purelink:
-                purelink.append(link) # Make unique list
+# Each queued link is a new job
+def create_jobs():
+    for link in file_to_set(QUEUE_FILE):
+        queue.put(link)
+    queue.join()
+    crawl()
 
-        for link in purelink:
-            print(link + '\n')
-        page += 1
+# Check if there are items in queue, if so crawl them
+def crawl():
+    queued_links = file_to_set(QUEUE_FILE)
+    if len(queued_links) > 0:
+        print(str(len(queued_links)) + ' links left')
+        create_jobs()
 
-trade_spider(5)
+create_spiders()
+crawl()
