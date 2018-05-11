@@ -4,7 +4,7 @@ from spider import Spider
 from domain import *
 from general import *
 
-PROJECT_NAME = 'Data'
+PROJECT_NAME = 'Links'
 HOMEPAGE = 'http://www.goal.com/id'
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
 QUEUE_FILE = PROJECT_NAME + '/queue.txt'

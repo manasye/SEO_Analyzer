@@ -48,7 +48,8 @@ class Spider:
         html_string = ''
         try:
             response = urlopen(page_url)
-            if 'text/html' in response.getheader('Content-Type'):
+            header = response.getheader('Content-Type')
+            if 'text/html' in header:
                 html_bytes = response.read()
                 html_string = html_bytes.decode("utf-8")
             finder = LinkFinder(Spider.base_url, page_url)
